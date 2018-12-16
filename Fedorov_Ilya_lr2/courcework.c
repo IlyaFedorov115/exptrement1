@@ -7,9 +7,25 @@
 #define NONE "\033[0m"
 #define GREEN "\033[0;32m"
 #define YELLOW "\033[0;33m"
+typedef struct {
+	int year;
+	int month;
+	int day;
+}date;
+
+int compare(const struct DATE * a, const struct DATE * b) {
+    if ( a->year == b->year ) {
+        if ( a->month == b->month )
+            return a->day - b->day;
+        else
+            return a->month - b->month;
+    }
+    else
+        return a->year - b->year;
+}
 
 char** memory_text(char **dynamic_array, int *num_sent){
-	int str_len = 12;  ///äëÿ îäíîé äàòû
+	int str_len = 12;  ///для одной даты
 	char symb;
  	int letters = 0;
 
@@ -54,9 +70,9 @@ char** delete_same(char **dynamic_array, int *num_sent)
               {
 		      for(int j = 0; j < strlen(dynamic_array[i]); j++)
                   {
-				   if (toupper(dynamic_array[i][j]) == toupper(dynamic_array[k][j]))   ///èëè while
+				   if (toupper(dynamic_array[i][j]) == toupper(dynamic_array[k][j]))   ///или while
                       {
-						++point; //// èëè point++;
+						++point; //// или point++;
                       }
                   }
                if (point == strlen(dynamic_array[i]))
@@ -72,17 +88,17 @@ char** delete_same(char **dynamic_array, int *num_sent)
 					point = 0;   
                 }
 			   }
-			else continue;  /// ìîæíî óáðàòü 
+			else continue;  /// можно убрать 
 		   } 
 	 }
   return dynamic_array;
 }
 
-//////âûâîä òåêñòà /////
+//////вывод текста /////
 void output_text(char ***dynamic_array, int *num_sent)
    {
     if (*num_sent == 0){
-		printf("%sÏðåäëîæåíèé íåò :(%s", YELLOW, NONE);
+		printf("%sПредложений нет :(%s", YELLOW, NONE);
 		printf("\n");
 	} 
 	else {
@@ -90,14 +106,14 @@ void output_text(char ***dynamic_array, int *num_sent)
 	     {
 	    	if ((*dynamic_array)[i] != NULL)
 		     {
-		    	printf("%s%s%s", GREEN, (*dynamic_array)[i], NONE);    //////ðàçîáðàòüñÿ ÷òî ýòî
+		    	printf("%s%s%s", GREEN, (*dynamic_array)[i], NONE);    //////разобраться что это
 		     }
     	 }
 	}
 }
 
 
-void find_date(char **dynamic_array,int *num_sent) {       ////////////ìîæåò áûòü 3 ***
+void find_date(char **dynamic_array,int *num_sent) {       ////////////может быть 3 ***
     char str[] = "12/2018";
     char *instr;
     int count = 0;
@@ -106,20 +122,20 @@ void find_date(char **dynamic_array,int *num_sent) {       ////////////ìîæå�
         instr = strstr(dynamic_array[i],str);
         if (instr != NULL){
              count ++;
-             for (int j = 0; j < strlen(dynamic_array[i]); j++)  // öèêë ïî ñòîëáöàì
+             for (int j = 0; j < strlen(dynamic_array[i]); j++)  // цикл по столбцам
                {
-               printf("%c", dynamic_array[i][j]); // 5 çíàêîìåñò ïîä ýëåìåíò ìàññèâà
+               printf("%c", dynamic_array[i][j]); // 5 знакомест под элемент массива
                }
                printf("\n");
         }
       }
-    if (count==0) printf("Äàòû íå íàøëîñü");
+    if (count==0) printf("Даты не нашлось");
     
 }
 
 void odd_delete(char ***dynamic_array, int *num_sent){
-    int count1 = 0;    ////÷èñëî äàò â ïðèíöèïå
-    int count2 = 0;    //// ÷èñëî äàò 19 âåêà
+    int count1 = 0;    ////число дат в принципе
+    int count2 = 0;    //// число дат 19 века
     char *bufer;
     char *instr;
     char fstr[] = "/18";
@@ -149,6 +165,94 @@ void odd_delete(char ***dynamic_array, int *num_sent){
 }
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+void min_date_and_max_date(char **dynamic_array, int *num_sent)
+  {
+    char *d;
+	char *m;
+	char *y;
+	int size = 10;
+	char *bufer;
+	date *dates = (date*)malloc(size * sizeof(date));
+	int index = 0;
+	for (int i = 0; i < *num_sent; i++)
+	  {
+	    bufer = (char*)malloc((strlen(dynamic_array[i])+1) * sizeof(char));
+		memcpy(bufer, dynamic_array[i], (strlen(dynamic_array[i])+1) * sizeof(char));
+		char *str = strtok(bufer, " \0");  ///////" ,.\0"
+	    while(str != NULL)
+	       {
+	         if (strlen(str) >= 10) {
+	             for (int j = 0; j < strlen(str); j++) {
+	                 if (isdigit(str[j]) && isdigit(str[j + 1]) && str[j + 2] == '/' && j + 9 < strlen(str)){
+	                     if (isdigit(str[j + 3]) && isdigit(str[j + 4]) && str[j + 5] == '/'){
+	                         if ( isdigit(str[j + 6]) && isdigit(str[j + 7]) && isdigit(str[j + 8]) && isdigit(str[j + 9])){
+	                            if (index >= size){
+								   size += 10;
+								   dates = (date*)realloc(dates, size * sizeof(date)); }
+								d = (char*)malloc(2 * sizeof(char));
+								d[0] = str[j];
+								d[1] = str[j + 1];
+								m = (char*)malloc(2 * sizeof(char));
+								m[0] = str[j + 3];
+								m[1] = str[j + 4];
+								y = (char*)malloc(4 * sizeof(char));
+								y[0] = str[j + 6];
+								y[1] = str[j + 7];
+								y[2] = str[j + 8];
+								y[3] = str[j + 9];
+								dates[index].day = atoi(d);
+								dates[index].month = atoi(m);
+								dates[index].year = atoi(y);
+								free(d); free(m); free(y);
+								index += 1;   
+	                         }
+	                     }
+	                 }
+	             }
+     
+	         }
+ 
+	        str = strtok(NULL, " \0");
+	        }//while
+	      free(bufer);
+	      qsort(dates, index, sizeof(date), (int(*)(const void *, const void *)) compare);///////вохможно нужно поменять
+	      if (index == 0){
+		       printf("%sВ предложении нет дат%s", YELLOW, NONE);
+	           }
+	     else { 
+	       printf("%sМинимальная и Максимальная дата для %d -го предложения%s",YELLOW,i,NONE);
+	     for (int k = 0; k < index; k + (index - 1)){
+	    	if (dates[k].day < 10){
+	    		printf("%s0%s", GREEN, NONE);
+	    	}
+	    	printf("%s%d//%s", GREEN, dates[k].day, NONE);
+	    	if (dates[k].month < 10){
+    			printf("%s0%s", GREEN, NONE);
+    		}
+    		printf("%s%d//%s", GREEN, dates[k].month, NONE);
+    		if (dates[k].year < 1000){
+	    		printf("%s0%s", GREEN, NONE);
+	    		if (dates[k].year < 100){
+            			printf("%s0%s", GREEN, NONE);
+              		if (dates[k].year < 10){
+             				printf("%s0%s", GREEN, NONE);
+            			}
+      			}
+    		}
+	     	printf("%s%d%s\n", GREEN, dates[k].year, NONE);
+	}
+	       }
+	free(dates);
+	index = 0;
+///	if (index == 0){
+//		printf("%sДат в тексте нет :(%s", YELLOW, NONE);
+//	}
+	  
+      
+  }///for
+	
+}
 
 ///////////////////////////////// MENUMENUMEN
 
@@ -157,7 +261,7 @@ void menu(char ***dynamic_array, int *num_sent){
 	char opp;
 	char tmp;
 	while (quit != 1){
-		printf("\nÂâåäèòå:\n\n1: äëÿ âûâîäà äàò èç òåêñòà â âîçðàñòàþùåì ïîðÿäêå\n\n2: äëÿ óäàëåíèÿ âñåõ ïðåäëîæåíèé ñ íå÷¸òíûì êîëè÷åñòâîì ñëîâ\n\n3: äëÿ ïðåîáðàçîâàíèÿ âñåõ ñëîâ â êîòîðûõ íåò öèôð ïðîïèñíûìè (êðîìå ïîñëåäíåé áóêâû)\n\n4: äëÿ âûâîäà âñåõ ïðåäëîæåíèé, â êîòîðûõ íåò çàãëàâíûõ áóêâ\n\n5: Äëÿ âûõîäà èç ïðîãðàììû\n\nÂâîä: ");
+		printf("\nВведите:\n\n1: для вывода дат из текста в возрастающем порядке\n\n2: для удаления всех предложений с нечётным количеством слов\n\n3: для преобразования всех слов в которых нет цифр прописными (кроме последней буквы)\n\n4: для вывода всех предложений, в которых нет заглавных букв\n\n5: Для выхода из программы\n\nВвод: ");
 		opp = getchar();
 		tmp = getchar();
 		if (tmp != '\n'){
@@ -186,18 +290,18 @@ void menu(char ***dynamic_array, int *num_sent){
 				quit = 1;
 				break;
 			default:
-				printf("%sÍåïðàâèëüíûé ââîä!%s", RED, NONE);
+				printf("%sНеправильный ввод!%s", RED, NONE);
 		}
 	}
 }
 
 void main()
 {
-    char **dynamic_array = malloc(sizeof(char*)); /// èëè òàê char **dynamic_array =(char**)malloc(sizeof(char*));
+    char **dynamic_array = malloc(sizeof(char*)); /// или так char **dynamic_array =(char**)malloc(sizeof(char*));
     int i = 0;
     int k, n , m = 0;    
 	int num_sent = 0;
-	printf(" Ââåäèòå òåêñò. Èñïîëüçîâàòüñÿ äîëæíû òîëüêî ëàòèíñêèå áóêâû è öèôðû. Ñëîâà îòäåëÿþòñÿ ïðîáåëàìè èëè çàïÿòûìè, ïðåäëîæåíèÿ — òî÷êàìè.\n\n");
+	printf(" Введите текст. Использоваться должны только латинские буквы и цифры. Слова отделяются пробелами или запятыми, предложения — точками.\n\n");
 	dynamic_array = memory_text(dynamic_array, &num_sent);
 	dynamic_array = delete_same(dynamic_array, &num_sent);
 	menu(&dynamic_array, &num_sent);

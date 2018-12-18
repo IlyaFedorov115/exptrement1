@@ -29,29 +29,33 @@ int main(){
     printf("Введите текст используя латинские буквы и цифры, разделителями между словами является запятая либо один пробел, а между предложениями точка\n");
     int len_text = 0;
     char choice;
+    char opp;
     char **dynamic_array = (char**)malloc(sizeof(char*));
     int i = 0;
+    int q = 0;
     int k, n , m = 0;    
 	int num_sent = 0;
 	printf(" Введите текст. Использоваться должны только латинские буквы и цифры. Слова отделяются пробелами или запятыми, предложения — точками.\n\n");
 	dynamic_array = memory_text(dynamic_array, &num_sent);
 	dynamic_array = delete_same(dynamic_array, &num_sent);
-    printf("\nВыберите одно из доступных действий:\n");
+  while (q != 1) {
     printf("\nВведите 1, если вы хотите удалить в каждом предложении встречающиеся в нем цифры.\n");
     printf("\nВведите 2, если вы хотите проверить является ли каждое предложение палиндромом.\n");
     printf("\nВведите 3, если вы хотите удалить все предложения у которых совпадают первый и последний символ без учета регистра.\n");
     printf("\nВведите 4, если вы хотите отсортировать предложения по увеличению длины третьего слова.\n(Когда кол-во слов в предложении меньше трех, длина его третьего слова будет равнятся 3)\n");
-    printf("\nВведите 5, если вы хотите заеончить работу программы.\n");
-    scanf("%c", &choice);
-    while (choice != '1' && choice != '2' && choice != '3' && choice != '4' && choice != '5'){
-        printf("\nВыбор некорректен, попробуйте снова\n");
-        scanf("\n%c", &choice);
-    }
-    switch (choice) {
-        case '1':
+    printf("\nВведите 5, если вы хотите закончить работу программы.\n");
+    //scanf("%c", &choice);
+    choice = getchar();
+    opp = getchar();
+      /* while (choice != '1' && choice != '2' && choice != '3' && choice != '4' && choice != '5'){
+           printf("\nВыбор некорректен, попробуйте снова\n");
+           scanf("\n%c", &choice);
+        } */
+        switch (choice) {
+             case '1':
 				find_date(dynamic_array, &num_sent);
 				break;
-			case '2':
+			 case '2':
 				odd_delete(dynamic_array,&num_sent);
 				output_text(dynamic_array, &num_sent);
 				break;
@@ -59,18 +63,20 @@ int main(){
 				min_date_and_max_date(dynamic_array,&num_sent);
 				output_text(dynamic_array, &num_sent);
 				break;
-			case '4':
+		     case '4':
 				//dynamic_array = sort_Sentence(dynamic_array, &num_sent);
 				qsort(dynamic_array, num_sent, sizeof(char*), comp);
 				output_text(dynamic_array, &num_sent);
 				break; 
-			case '5':
-				printf("%s\nAu revoir\n%s", GREEN, NONE);
+			 case '5':
+				printf("%s\nGoodbye, User\n%s", GREEN, NONE);
+				free_Memory(dynamic_array, num_sent);
+				q = 1;
 				break;
-			default:
+			 default:
 				printf("%sНеправильный ввод!%s", RED, NONE);
         }
-    
+     }
     return 0;
 }
 
@@ -343,9 +349,9 @@ void min_date_and_max_date(char **dynamic_array, int *num_sent)
 int comp(const char* a, const char* b){
     const char *str1 = *( const char * const *) a;
     const char *str2 = *( const char * const *) b;
-    int mins_1 = 1190000;
+    int mins_1 = MAX;
     int min1 = 0;
-    int mins_2 = 1190000;
+    int mins_2 = MAX;
     int min2 = 0;
     int x;
     char y;
@@ -379,6 +385,20 @@ int comp(const char* a, const char* b){
     }
 }
 
+void free_Memory(char **dynamic_array, int n){
+    for (int i = 0; i < n ; i++){
+        free(dynamic_array[i]);
+    }
+   free(dynamic_array);
+}  
+/*void free_Memory(char ***dynamic_array, int n){
+    for (int i = 0; i < n ; i++){
+        free((*dynamic_array)[i]);
+    }
+   free(*dynamic_array);
+}  */
+
 ///////////////////////////////// MENUMENUMEN
+
 
 

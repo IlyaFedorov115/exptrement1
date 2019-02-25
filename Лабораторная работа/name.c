@@ -1,18 +1,77 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-
+ 
 // Описание структуры MusicalComposition
-
+/*typedef*/ 
+struct MusicalComposition {
+    char name[80];
+    char author[80];
+    int year;
+    struct MusicalComposition* Prior;
+    struct MusicalComposition* Next;
+};
 
 // Создание структуры MusicalComposition
 
 MusicalComposition* createMusicalComposition(char* name, char* autor,int year);
+//
+
+MusicalComposition* createMusicalComposition(char* name, char* autor,int year){
+    MusicalComposition* temp = (MusicalComposition*)malloc(sizeof(MusicalComposition));
+    //strcpy(&(elem->name), name);
+    strcpy(temp.name, name); //// -> ->
+    strcpy(temp.author, autor);
+    temp.year = year;
+    return temp;
+}
 
 // Функции для работы со списком MusicalComposition
 
 MusicalComposition* createMusicalCompositionList(char** array_names, char** array_authors, int* array_years, int n);
+///
+MusicalComposition* createMusicalCompositionList(char** array_names, char** array_authors, int* array_years, int n)
+   {
+    if (n > 0) {
+    MusicalComposition* Head = createMusicalComposition(array_names[0], array_authors[0], array_years[0]);
+    (*Head).Prior = NULL;
+    (*Head).Next = NULL;
+    MusicalComposition* Current = Head;
+        for (int i = 1; i < n; i++)
+           {
+             (*Current).Next = createMusicalComposition(array_names[i], array_authors[i],array_years[i]);  
+             (Current->Next).Next = NULL;
+             (Current->Next).Prior = Current;//обнуление адресного поля
+             Current = (*Current).Next;
+           }
+        }   
+    else (*Head) = NULL;
+
+  
+    return Head;
+                
+   }
+    
+    
+int count(MusicalComposition* head){
+    MusicalComposition* Current = head;
+    int count = 0;
+    while (*Current.Next)
+        count++;
+    return count;    
+}
+
+void print_names(MusicalComposition* head){
+    MusicalComposition* Current = head;
+    int i;
+    for (i = 0; *Current.Next ; i++)
+       {
+           fputs(*Current.name,stdout);
+           Current = (*Current).Next;
+       }
+    fputs(*Current.name,stdout);
+}
+
 
 void push(MusicalComposition* head, MusicalComposition* element);
 

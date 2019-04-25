@@ -2,7 +2,8 @@
 #include <sys/types.h>                                                          
 #include <dirent.h>                                                             
 #include <string.h>                                                             
-#include <stdlib.h>                                                             
+#include <stdlib.h>     
+de->d_name[0] != '.'
 int dirsearch(const char *dirPath, char *prevDir){                                   
         DIR *dir = opendir(dirPath);                                                                                           
         char *dirName;                                                          

@@ -5,6 +5,11 @@
 
 #include <png.h>
 #include <getopt.h>
+#define RED "\033[0;31m"
+#define NONE "\033[0m"
+#define GREEN "\033[0;92m"
+#define YELLOW "\033[0;33m"
+#define YELLOW "\033[0;33m"
 
 struct png{
 
@@ -253,6 +258,19 @@ void swap_pixel(png_byte* pix1, png_byte* pix2)
 
 }
 
+/*
+void Draw_wy(struct png* image, int x0, int y0, int x1, int y1, int c, int width, png_byte* rgv){
+    if(x1 == x0 && y1 == y0){
+        set_pixel(image, x1 , y1 , rgb);
+        return;
+    }
+    if ((x1 == x0 && y1 != y0) || (x1 != x0 && y1 == y0) )
+        {
+            draw_line(image, x0 , y0 ,x1 , y1 ,width, rgb);
+            return;
+        }
+    
+} */
 
 /*
 
@@ -318,7 +336,7 @@ void draw_circle(struct png* image, int Sx, int Sy, int R, int width, png_byte *
     {
         for(j = 0; j <= R; j++){
 
-            if( (i*i + j*j) <= R*R && (i*i + j*j) >= (R -width)*(R - width))
+            if( (i*i + j*j) <= R*R && (i*i + j*j) >= (R - width)*(R - width))
             {
                
                 setPixel(image, Sx + i, Sy + j, rgb);
@@ -332,6 +350,29 @@ void draw_circle(struct png* image, int Sx, int Sy, int R, int width, png_byte *
 }
 
 
+void BresenhamCircle(image, int x0, int y0, int radius, int width, png_byte* rgb) {
+    int x = radius; 
+    int y = 0;
+    int radiusError = 1 - x;
+    while (x >= y) {
+        setPixel(image,x + x0, y + y0, rgb); 
+        setPixel(image,y + x0, x + y0, rgb);
+        setPixel(image,-x + x0, y + y0, rgb); 
+        setPixel(image,-y + x0, x + y0, rgb); 
+        setPixel(image,-x + x0, -y + y0, rgb);
+        setPixel(image,-y + x0, -x + y0, rgb); 
+        setPixel(image,x + x0, -y + y0, rgb); 
+        setPixel(image,y + x0, -x + y0, rgb);
+        y++; 
+        if (radiusError < 0)
+            radiusError += 2 * y + 1; 
+        else
+        {
+            x--;
+             radiusError += 2 * (y - x + 1);
+        }
+   }
+}
 /*	png_byte color[4];
 	color[0] = 0;
     color[1] = 50;
@@ -349,10 +390,80 @@ int is_digit(char *str)
     return 1;
 }
 
+
+
+
+void reflection(struct png *image, int x0, int y0, int x1, int y1, char axis)
+{   //возможно оси наоборот
+	int x;
+    int y;
+    if (x0 > x1) {
+        int c = x0;
+        x0 = x1;
+        x1 = c;
+        c = y0;
+        y0 = y1;
+        y1 = c;
+    }
+    if(axis == 'x'){
+        int length = x1 - x0 + 1;
+        int width = x0 +(length - 3)/2 + (length - 3)%2;
+        for(x = x0; x <= width; x++){
+            for(y = y0; y <= y1; y++){
+                png_byte *row1 = image->row_pointers[y];
+                png_byte *ptr1 = &(row1[x*4]);
+                png_byte *ptr2 = &(row1[(x1 - x + x0)*4]);
+                swap_pixel(ptr1, ptr2);
+            }
+        }
+   }
+    else if (axis == 'y') {
+        int length = y1 - y0 + 1;
+        int height = y0 +(length - 3)/2 + (length - 3)%2;
+        for(y = y0; y <= height; y++){
+             png_byte *row1 = image->row_pointers[y];
+             png_byte *row2 = image->row_pointers[y1 - y + y0];
+            for(x = x0; x <= x1; x++){
+                png_byte *ptr1 = &(row1[x*4]);
+                png_byte *ptr2 = &(row2[(x)*4]);
+                swap_pixel(ptr1, ptr2);
+            }
+        }
+    }
+	
+
+}
+
+
+void print_help()
+{
+      printf("Справка ============================================================\n");
+  //  printf("%s--copy, -c \t\t%s- делает копию заданного участка. Участок задается при помощи -S  и -E.\n", GREEN,NONE);
+   // printf("        Пример: --copy -S 100 100 -E 200 200 fileOut.png\n");
+    printf("%s--reflect, -r \t\t%s - выполняет отражения участка относительно заданной оси  \n \t\t\t  Участок задается при помощи -S и -E, ось задается при помощи -O\n", GREEN,NONE);
+    printf("\t\t\t  Пример: --reflect -S 100 200 -E 500 700 -O x result.png\n");
+    printf("%s--draw_circle, -d \t%s- рисует окружность вписанную в квадрат. \n\t\t\t\t Квадрат задается при помощи координат левого верхнего угла -S и  радиуса окружности -R ", GREEN,NONE);
+    printf("\n%s--line, -d \t\t %s- рисует линию. Задается координатами начала -S и конца -E, шириной -W и цветом -C", GREEN,NONE);
+    printf("\n\t\t\t\t Пример: --line -S 50 50 -E 100 100 -W 5 -C red result.png");
+    printf("%s\n--start, -S \t\t %s- считывает координаты (тип int) верхнего левого угла прямоугольной области,\n \t\t\t   центра пентаграммы либо начала линии\n", GREEN,NONE);
+    printf("%s--end, -E \t\t%s- считывает координаты (тип int) нижнего правого угла прямоугольной области, либо конца линии \n", GREEN,NONE);
+    printf("%s--color, -C \t\t %s- считывает цвет. Палитра: red, green, blue, white, black , orange , yellow \n", GREEN,NONE);
+    printf("%s--os, -O \t\t %s- считывает оси (x или y) \n", GREEN,NONE);
+    printf("%s--width, -W \t\t %s- считывает значение ширины \n", GREEN,NONE);
+    printf("%s--radius, -R \t\t %s- считывает заначение радиуса \n", GREEN,NONE);
+    printf("%s--info, -i \t\t %s- выводит информацию об изображении\n", GREEN,NONE);
+    printf("%s--help, -h -? \t\t %s- вызывает справку", GREEN,NONE);
+    printf("\nСтрока команд может заканчиваться названием файла с изменениями, иначе будет создан файл  result.png \n");
+    printf("============================================================================");
+
+}
+
+
+
 int main(int argc, char *argv[]){
    
     if (argc == 1) {
-        prinf("Ошибка, не введены парметры");
+        prinf("Ошибка, не введены параметры");
         return 0;
     }
 
@@ -361,7 +472,7 @@ int main(int argc, char *argv[]){
     optopt – последний из известных параметров.*/
 	int opt;
 	struct global_args argument;
-    int flag = 0;
+    int action = 0;
     struct png image;
     int i;
 
@@ -521,19 +632,21 @@ int main(int argc, char *argv[]){
                 break;
                 
             case 'i':
-                flag = 'i';
+                action = 'i';
                 break;
 
             case 'r':
-                flag = 'r';
+                action = 'r';
                 break;
             
-            case 'c':
+          /*  case 'c':
                 flag = 'c';
+                break;  */
+            case 'p':
+                // пентаграмма    
                 break;
-            
-            case 'd':
-                flag = 'd';
+            case 'l':
+                action = 'l';
                 break;
         }
            
@@ -541,69 +654,80 @@ int main(int argc, char *argv[]){
         
     }
 
-    switch(flag){
-        case'r':
-
-            if(a.start[0] < 0 || 
-               a.start[1] < 0 || 
-               a.end[0] > image.width || 
-               a.end[1] > (image.height - 1) ||
-               a.start[0] >= a.end[0] || 
-               a.start[1] >= a.end[1] )
+    switch(action){
+        case 'r': //////возможно лишние ограничения, разобраться как исправить !!!!!!!!!!!!!!!!!!!!
+            if(argument.start[0] < 0 || argument.start[1] < 0 || argument.end[0] > image.width || argument.end[1] > (image.height - 1) || argument.start[0] >= argument.end[0] || argument.start[1] >= argument.end[1])
                {
                    printf("Область отражениея не является корректной\n");
                    break;
                }
             else
             {
-                reflect(&image, a.start[0], a.start[1], a.end[0], a.end[1], a.Os);
+                reflection(&image, argument.start[0], argument.start[1], argument.end[0], argument.end[1], argument.Os);
             }
             
         break;
+/*
+        case 'c':
 
-        case'c':
-
-            if(a.start[0] < 0 || 
-               a.start[1] < 0 || 
-               a.end[0] > image.width || 
-               a.end[1] > (image.height - 1) ||
-               a.start[0] > a.end[0] || 
-               a.start[1] > a.end[1])
+            if(argument.start[0] < 0 || 
+               argument.start[1] < 0 || 
+               argument.end[0] > image.width || 
+               argument.end[1] > (image.height - 1) ||
+               argument.start[0] > argument.end[0] || 
+               argument.start[1] > argument.end[1])
                {
                    printf("Область копирования не является корректной\n");
                    break;
                }
             else
             {
-                doCopy(&image, a.start[0], a.start[1], a.end[0], a.end[1]);
+                doCopy(&image, argument.start[0], argument.start[1], argument.end[0], argument.end[1]);
             }
             
         break;
+                */
+        case 'p':
 
-        case'd':
-
-            if(a.start[0] < 0 || 
-               a.start[1] < 0 || 
-               a.start[0] + a.R > image.width || 
-               a.start[1] + a.R > (image.height - 1)||
-               a.start[0] - a.R < 0 ||
-               a.start[1] - a.R < 0 ||
-               a.R <= 0 ||
-               a.width > a.R ||
-               a.width < 0)
+            if(argument.start[0] < 0 || 
+               argument.start[1] < 0 || 
+               argument.start[0] + argument.R > image.width || 
+               argument.start[1] + argument.R > (image.height - 1)||
+               argument.start[0] - argument.R < 0 ||
+               argument.start[1] - argument.R < 0 ||
+               argument.R <= 0 ||
+               argument.width > argument.R ||
+               argument.width < 0)
                {
-                   printf("Невозможно нарисовать круг по введенным данным\n");
+                   printf("Невозможно нарисовать пентаграмму по введенным данным\n");
                    break;
                }
             else
             {
-                drawCircle(&image,a.start[0], a.start[1], a.R, a.width, a.color);
+                draw_line(&image, argument.start[0] , argument.start[1], argument.end[0], argument.end[1], argument.width, argument.color);//возмнжно &color
+            }
+            
+        break;
+        case 'l': /// ТОЖЕ лишние ограничения глянуть !!!!!!!!!!!!
+             if(argument.start[0] < 0 || argument.end[0] < 0 ||
+               argument.start[1] < 0 || argument.end[1] < 0 ||
+               argument.end[0] > image.width || 
+               argument.end[1] > (image.height) ||
+               argument.start[0] > argument.end[0] || 
+               argument.start[1] > argument.end[1]) || argument.width < 0 )
+               {
+                   printf("Не возможно нарисовать линию по введенным данным\n");
+                   break;
+               }
+            else
+            {
+                 draw_line(&image, argument.start[0] , argument.start[1], argument.end[0], argument.end[1], argument.width, argument.color);//возмнжно &color
             }
             
         break;
 
         case 'h':
-            printHelp();
+            print_help();
         break;
 
         case 'i':
@@ -613,5 +737,5 @@ int main(int argc, char *argv[]){
     }
   
     doNewFile(&image, argv[argc - 1]);
-
+//return 0;
 }

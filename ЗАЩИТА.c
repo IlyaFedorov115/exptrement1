@@ -80,3 +80,67 @@ int main(){
     return 0;
 }
 
+
+
+
+
+
+
+
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <string.h>
+
+#define MAX_PATH 255
+
+
+void delete(const char *dirPath, char* str){
+    DIR *dir = opendir(dirPath);
+     /// df
+      if(dir) {
+        struct  dirent *de = readdir(dir);
+        char* Current_Path = (char*)malloc((MAX_PATH+1)*sizeof(char));
+         Current_Path[0] = '\0';
+        strcat(Current_Path, dirPath);
+        strcat(Current_Path, "/");
+        while (de) {
+            if (strstr(de->d_name, ".")) {
+               // int n = strlen(str);
+                  int n = strstr(de->d_name, ".") - de->d_name - 1;
+                  int c = strstr(de->d_name, str) - de->d_name;
+                  int flag = 0;
+                  if (strlen(str) < strlen(de->d_name)) {
+                  for (int i = strlen(str) - 1; i < 0 ; i--){
+                        if (str[i] == de->d_name[n]) flag++;
+                        n--;
+                  }
+                  }
+                  else { flag = 0; };
+                  if (flag == strlen(str)){
+                      strcat(Current_Path, de->d_name);
+                      remove(Current_Path);
+                  }
+               /* if((strncmp(de->d_name, str, strlen(str)) == 0 && (strlen(str) - n == 0)) || ((c != NULL) && (c+strlen(str) == n) ) )
+                  {
+                      strcat(Current_Path, de->d_name);
+                      remove(Current_Path);
+                  }  */
+            }
+            de = readdir(dir);
+            Current_Path[0] = '\0';
+            strcat(Current_Path, dirPath);
+            strcat(Current_Path, "/");
+        }
+        closedir(dir);
+    }
+}
+
+int main(){
+    char name[MAX_PATH+1];
+    scanf("%s", name);
+    delete("tmp", name);
+    return 0;
+}

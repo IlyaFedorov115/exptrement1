@@ -8,30 +8,30 @@ typedef struct Node{
     struct Node* prev;
 }Node;
 
-
 typedef struct Stack{
     struct Node* head;
 }Stack;
 
-void Push (Stack** S, char* tag){
+void Push(Stack** S, char* tag){
     Node* Newnode = (Node*)malloc(sizeof(Node));
     strcpy(Newnode->data, tag);
     Newnode->prev = (*S)->head;
     (*S)->head = Newnode;
+    printf("\t\n Добавили = %s", (*S)->head->data);
 }
- 
 
-char* Pop (Stack** S){
-    if ((*S)->head == NULL){
+
+char* Pop (Stack* S){
+    if (S->head == NULL){
         printf("Стек пуст");
         return;
     }
-    Node* tmp = (*S)->head;
+    Node* tmp = S->head;
     char *tag;
-    *tag = (*S)->head->data;
+    *tag = S->head->data;
   //  strcpy(tag, (*S)->head->data);
- //   Node* tmp = (*S)->head;
-    (*S)->head = (*S)->head->prev;
+//    Node* tmp = (*S)->head;
+    S->head = S->head->prev;
     free(tmp);
     return tag;
 }
@@ -43,20 +43,25 @@ int is_Empty (Stack* S)
         return 0;
     }
     return 1;
-   }
+}
+
+void print_list(Stack* S){
+    Node* tmp = S->head;
+    while (tmp){
+        printf("\nEl = %s", tmp->data);
+        tmp = tmp->prev;
+    }
+}
 
 int main() {
     int result = 1;
     int flag = 1;  char c;
     Stack *S = malloc(sizeof(Stack));
-    printf("It is pkey 1 \n");
     S->head = NULL;
-    printf("WTF");
     char tag[11];
     while((c = getchar()) != '\n')
     {
        int i = 0; flag = 1;
-
         if (c == '<')
         {
           tag[i++] = c;
@@ -71,7 +76,7 @@ int main() {
           }
            tag[i] = '\0';
 
-          if (flag == 1)
+           if (flag == 1)
           {
                if (strcmp("<br>", tag)!=0 && strcmp("<hr>", tag)!=0)
                    Push(&S, tag);   
@@ -87,6 +92,7 @@ int main() {
         }
     }
     if (is_Empty(S) == 0) result = 0;
+     print_list(S);
 
     if (result == 0)  printf("wrong");
     else  printf("correct");

@@ -34,16 +34,16 @@ int main(){
     long long ttime;
     ttime = time(NULL);
     clock_t c1 = clock();
-    for(int i = 1; i <= MAX_SIZE; i++){
+    for(int i = 0; i < MAX_SIZE; i++){
         push(S, i);
     }
     int t = (int)((clock() - c1));
     printf("time of push: %.3f sec \n", (float)t/CLOCKS_PER_SEC);
     clock_t c2 = clock();
-    for(int i = 1; i <= MAX_SIZE; i++){
+    for(int i = 0; i < MAX_SIZE; i++){
         pop(S);
     }
   t = (int)((clock() - c2));
     printf("time of pop: %.3f sec", (float)t/CLOCKS_PER_SEC);
     return 0;    
-} 
+}

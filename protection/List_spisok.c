@@ -53,10 +53,12 @@ int main(){
     int t = (int)((clock() - c1));
     printf("time of push: %.3f sec \n", (float)t/CLOCKS_PER_SEC);
     clock_t c2 = clock();
-    for(int i = 1; i < MAXSIZE; i++){
+    for(int i = 0; i < MAXSIZE; i++){
         pop(&head);
     }
     t = (int)((clock() - c2));
     printf("time of pop: %.3f sec", (float)t/CLOCKS_PER_SEC);
+    printf("\nhead = %p", head);
+  //  printf("head->data = %d", head->data);
     return 0;    
 }

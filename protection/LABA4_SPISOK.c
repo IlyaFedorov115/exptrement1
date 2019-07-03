@@ -21,19 +21,21 @@ void Push(Stack** S, char* tag){
 }
 
 
-char* Pop (Stack* S){
-    if (S->head == NULL){
+void Pop (Stack** S){
+    if ((*S)->head == NULL){
         printf("Стек пуст");
         return;
     }
-    Node* tmp = S->head;
+    Node* tmp = (*S)->head;
     char *tag;
-    *tag = S->head->data;
   //  strcpy(tag, (*S)->head->data);
 //    Node* tmp = (*S)->head;
-    S->head = S->head->prev;
+    (*S)->head = (*S)->head->prev;
     free(tmp);
-    return tag;
+}
+
+Node* top(Stack* S){
+    return S->head;
 }
 
 int is_Empty (Stack* S)
@@ -85,7 +87,8 @@ int main() {
            {
                if (strcmp("<br>", tag)!=0 && strcmp("<hr>", tag)!=0)
                {
-                    if (strcmp(tag, Pop(S)) != 0) {result = 0; break; }
+                    if (strcmp(tag, top(S)->data) != 0) {result = 0; break; }
+                    Pop(&S);
                }
            }
 
